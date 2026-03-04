@@ -11,6 +11,13 @@ import { buildCalendarSnapshot, syncCalendarAccount } from "@/lib/calendar-sync"
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+function isHostedCalendarDisabled(): boolean {
+  return (
+    process.env.AGENTBAY_HOSTED === "true" ||
+    process.env.NEXT_PUBLIC_AGENTBAY_HOSTED === "true"
+  );
+}
+
 function parseDays(value: string | null): number {
   const parsed = Number(value || "14");
   if (!Number.isFinite(parsed)) return 14;
@@ -18,6 +25,9 @@ function parseDays(value: string | null): number {
 }
 
 export async function GET(request: NextRequest) {
+  if (isHostedCalendarDisabled()) {
+    return NextResponse.json({ error: "Calendar is unavailable in hosted mode" }, { status: 404 });
+  }
   try {
     const days = parseDays(request.nextUrl.searchParams.get("days"));
     return NextResponse.json(await buildCalendarSnapshot(days), {
@@ -32,6 +42,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  if (isHostedCalendarDisabled()) {
+    return NextResponse.json({ error: "Calendar is unavailable in hosted mode" }, { status: 404 });
+  }
   try {
     const body = await request.json();
     const action = String(body?.action || "");

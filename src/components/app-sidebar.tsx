@@ -16,11 +16,13 @@ import {
   Settings,
 } from "lucide-react";
 
+const isAgentbayHosted = process.env.NEXT_PUBLIC_AGENTBAY_HOSTED === "true";
+
 const navItems: { section: string; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { section: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { section: "tasks", label: "Tasks", icon: LayoutGrid },
   { section: "cron", label: "Cron Jobs", icon: Clock },
-  { section: "calendar", label: "Calendar", icon: Calendar },
+  ...(!isAgentbayHosted ? [{ section: "calendar", label: "Calendar", icon: Calendar }] : []),
   { section: "channels", label: "Channels", icon: Radio },
   { section: "memory", label: "Memory", icon: Brain },
   { section: "docs", label: "Docs", icon: FolderOpen },
