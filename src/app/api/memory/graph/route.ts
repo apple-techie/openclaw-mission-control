@@ -1009,7 +1009,8 @@ async function readRecentChatMessages(limitSessions = 8, perSessionLimit = 40): 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const mode = searchParams.get("mode") || "";
+    const modeParam = searchParams.get("mode") || "";
+    const mode = modeParam === "bootstrap" ? "bootstrap" : "";
     const cacheKey = `memory-graph:${mode}`;
 
     const result = await cachedResponse(cacheKey, 30_000, async () => {
