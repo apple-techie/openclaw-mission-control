@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readFile, writeFile, mkdir } from "fs/promises";
 import { join, dirname } from "path";
+import { z } from "zod";
 import { getOpenClawHome } from "@/lib/paths";
 import { buildModelsSummary } from "@/lib/models-summary";
 import {
@@ -10,6 +11,12 @@ import {
   fetchModelsFromProvider,
 } from "@/lib/provider-auth";
 import { patchConfig } from "@/lib/gateway-config";
+
+const AuthProviderSchema = z.object({
+  provider: z.string().trim().toLowerCase().min(1, "Provider is required"),
+  token: z.string().trim().min(1, "Provider and API key are required"),
+  model: z.string().trim().optional().default(""),
+});
 
 export const dynamic = "force-dynamic";
 
@@ -45,13 +52,11 @@ export async function POST(request: NextRequest) {
     switch (action) {
       // ── Connect a provider (save API key + optionally set default model) ──
       case "auth-provider": {
-        const provider = String(body.provider || "").trim().toLowerCase();
-        const token = String(body.token || "").trim();
-        const modelToSet = String(body.model || "").trim();
-
-        if (!provider || !token) {
-          return json({ error: "Provider and API key are required" }, 400);
+        const parsed = AuthProviderSchema.safeParse(body);
+        if (!parsed.success) {
+          return json({ error: parsed.error.issues.map((i) => i.message).join("; ") }, 400);
         }
+        const { provider, token, model: modelToSet } = parsed.data;
 
         // Validate the key against the provider's API
         const validation = await validateProviderToken(provider, token);

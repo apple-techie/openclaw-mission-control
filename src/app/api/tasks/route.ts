@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { join, dirname } from "path";
+import { z } from "zod";
 import { getDefaultWorkspace } from "@/lib/paths";
 import { getClient } from "@/lib/openclaw-client";
 import { gatewayCall } from "@/lib/openclaw";
 import { notifyKanbanUpdated } from "@/lib/kanban-live";
+import { parseBody } from "@/lib/api-validation";
+
+const PutBoardSchema = z.object({
+  columns: z.array(z.any(), { message: "columns must be an array" }),
+  tasks: z.array(z.any(), { message: "tasks must be an array" }),
+}).passthrough();
 
 async function getKanbanPath(): Promise<string> {
   const ws = await getDefaultWorkspace();
@@ -73,15 +80,11 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
-    const body = await request.json();
-    if (!body.columns || !body.tasks) {
-      return NextResponse.json(
-        { error: "columns and tasks required" },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseBody(request, PutBoardSchema);
+    if (parsed.error) return parsed.error;
+    const body = parsed.data;
     // Strip internal fields before saving
-    const { _fileExists: _, ...saveData } = body;
+    const { _fileExists: _, ...saveData } = body as Record<string, unknown>;
     void _;
     await writeKanban(saveData as KanbanData);
     notifyKanbanUpdated();

@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { runCliCaptureBoth, gatewayCall } from "@/lib/openclaw";
+
+const SetTimezoneSchema = z.object({
+  timezone: z.string().min(1, "timezone required"),
+});
 
 export const dynamic = "force-dynamic";
 
@@ -71,10 +76,11 @@ export async function POST(request: NextRequest) {
     switch (action) {
       /* ── Set timezone ───────────────────────────── */
       case "set-timezone": {
-        const tz = body.timezone as string;
-        if (!tz || typeof tz !== "string") {
-          return NextResponse.json({ error: "timezone required" }, { status: 400 });
+        const parsed = SetTimezoneSchema.safeParse(body);
+        if (!parsed.success) {
+          return NextResponse.json({ error: parsed.error.issues.map((i) => i.message).join("; ") }, { status: 400 });
         }
+        const tz = parsed.data.timezone;
 
         // Validate timezone is a plausible IANA string
         try {

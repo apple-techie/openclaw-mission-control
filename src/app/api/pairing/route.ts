@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { gatewayCall, parseJsonFromCliOutput, runCli, runCliCaptureBoth } from "@/lib/openclaw";
 import { getOpenClawHome } from "@/lib/paths";
 import { readdir, readFile } from "fs/promises";
 import { join } from "path";
+
+const ApproveDmSchema = z.object({
+  channel: z.string().min(1, "channel required"),
+  code: z.string().min(1, "code required"),
+  account: z.string().trim().optional(),
+});
+
+const DeviceRequestIdSchema = z.object({
+  requestId: z.string().min(1, "requestId required"),
+});
 
 export const dynamic = "force-dynamic";
 
@@ -219,17 +230,16 @@ export async function POST(request: NextRequest) {
 
     switch (action) {
       case "approve-dm": {
-        const channel = body.channel as string;
-        const code = body.code as string;
-        const account = body.account as string | undefined;
-        if (!channel || !code) {
+        const parsed = ApproveDmSchema.safeParse(body);
+        if (!parsed.success) {
           return NextResponse.json(
-            { error: "channel and code required" },
+            { error: parsed.error.issues.map((i) => i.message).join("; ") },
             { status: 400 }
           );
         }
+        const { channel, code, account } = parsed.data;
         const args = ["pairing", "approve", channel, code];
-        if (account && account.trim()) args.push("--account", account.trim());
+        if (account) args.push("--account", account);
         args.push("--notify");
         const output = await runCli(
           args,
@@ -239,13 +249,14 @@ export async function POST(request: NextRequest) {
       }
 
       case "approve-device": {
-        const requestId = body.requestId as string;
-        if (!requestId) {
+        const parsed = DeviceRequestIdSchema.safeParse(body);
+        if (!parsed.success) {
           return NextResponse.json(
-            { error: "requestId required" },
+            { error: parsed.error.issues.map((i) => i.message).join("; ") },
             { status: 400 }
           );
         }
+        const { requestId } = parsed.data;
         const result = await gatewayCall<Record<string, unknown>>(
           "device.pair.approve",
           { requestId },
@@ -255,13 +266,14 @@ export async function POST(request: NextRequest) {
       }
 
       case "reject-device": {
-        const requestId = body.requestId as string;
-        if (!requestId) {
+        const parsed = DeviceRequestIdSchema.safeParse(body);
+        if (!parsed.success) {
           return NextResponse.json(
-            { error: "requestId required" },
+            { error: parsed.error.issues.map((i) => i.message).join("; ") },
             { status: 400 }
           );
         }
+        const { requestId } = parsed.data;
         const result = await gatewayCall<Record<string, unknown>>(
           "device.pair.reject",
           { requestId },
