@@ -4,7 +4,25 @@ node_modules
 .env*
 *.pem
 .DS_Store
+.claude/
+.github/
+.npmignore
+
+# test artifacts
 playwright-report
 test-results
 coverage
-.claude/
+e2e/
+.playwright-mcp/
+.playwright-cli/
+
+# build artifacts
+*.tsbuildinfo
+next-env.d.ts
+
+# not needed in image
+*.md
+*.png
+LICENSE
+setup.sh
+run-mc.sh
