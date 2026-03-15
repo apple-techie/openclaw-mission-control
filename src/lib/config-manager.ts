@@ -1,8 +1,9 @@
 /**
  * Atomic config manager for disk-level config writes.
  *
- * Serializes concurrent read/write operations on openclaw.json via an
- * async mutex and uses atomic rename for writes (write to .tmp, rename).
+ * Serializes concurrent read/write operations on openclaw.json within
+ * a single Node.js process via an async mutex, and uses atomic rename
+ * for writes (write to .tmp, rename). Does not provide cross-process locking.
  */
 
 import { readFile, writeFile, rename, mkdir } from "fs/promises";
@@ -76,7 +77,11 @@ export async function updateConfigFile(
       // fresh config
     }
 
-    config = patchFn(config);
+    const patched = patchFn(config);
+    if (!patched || typeof patched !== "object" || Array.isArray(patched)) {
+      throw new Error("patchFn must return a non-null object");
+    }
+    config = patched;
 
     const tmpPath = fp + ".tmp";
     await mkdir(dirname(fp), { recursive: true });
