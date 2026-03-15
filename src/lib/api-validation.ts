@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import type { ZodSchema } from "zod";
+import type { ZodType } from "zod";
 
 type ParseSuccess<T> = { data: T; error?: never };
 type ParseFailure = { data?: never; error: NextResponse };
@@ -8,7 +8,7 @@ type ParseResult<T> = ParseSuccess<T> | ParseFailure;
 
 export async function parseBody<T>(
   request: NextRequest,
-  schema: ZodSchema<T>,
+  schema: ZodType<T>,
 ): Promise<ParseResult<T>> {
   let raw: unknown;
   try {

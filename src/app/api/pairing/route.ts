@@ -6,8 +6,8 @@ import { readdir, readFile } from "fs/promises";
 import { join } from "path";
 
 const ApproveDmSchema = z.object({
-  channel: z.string().min(1, "channel required"),
-  code: z.string().min(1, "code required"),
+  channel: z.string().trim().min(1, "channel required"),
+  code: z.string().trim().min(1, "code required"),
   account: z.string().trim().optional(),
 });
 

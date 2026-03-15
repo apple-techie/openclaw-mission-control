@@ -15,7 +15,7 @@ import { updateConfigFile } from "@/lib/config-manager";
 
 const AuthProviderSchema = z.object({
   provider: z.string().trim().toLowerCase().min(1, "Provider is required"),
-  token: z.string().trim().min(1, "Provider and API key are required"),
+  token: z.string().trim().min(1, "API key is required"),
   model: z.string().trim().optional().default(""),
 });
 
