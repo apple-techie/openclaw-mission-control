@@ -6,6 +6,7 @@ import { join } from "path";
 import { getOpenClawHome } from "@/lib/paths";
 import { logRequest, logError } from "@/lib/request-log";
 import { randomBytes } from "crypto";
+import { cachedResponse, invalidateCache } from "@/lib/api-cache";
 
 export const dynamic = "force-dynamic";
 const OPENCLAW_HOME = getOpenClawHome();
@@ -317,42 +318,46 @@ export async function GET(request: NextRequest) {
     }
 
     // Default: config first, schema best-effort.
-    const configData = await gatewayCallWithRetry<Record<string, unknown>>(
-      "config.get",
-      undefined,
-      10000,
-      1
-    );
-
-    let schemaData: Record<string, unknown> | null = null;
-    let warning: string | undefined;
-    try {
-      schemaData = await gatewayCallWithRetry<Record<string, unknown>>(
-        "config.schema",
+    const result = await cachedResponse("config", 10_000, async () => {
+      const configData = await gatewayCallWithRetry<Record<string, unknown>>(
+        "config.get",
         undefined,
-        15000,
+        10000,
         1
       );
-    } catch (err) {
-      warning = formatGatewayError(err);
-      console.warn("Config schema unavailable, serving config without schema:", err);
-    }
 
-    // Gateway config.get returns { parsed, resolved, hash }. parsed = openclaw.json shape (top-level: agents, gateway, channels, tools, etc.).
-    const parsed = (configData.parsed || {}) as Record<string, unknown>;
-    const resolved = (configData.resolved || {}) as Record<string, unknown>;
-    const redacted = redactSensitive(resolved) as Record<string, unknown>;
+      let schemaData: Record<string, unknown> | null = null;
+      let warning: string | undefined;
+      try {
+        schemaData = await gatewayCallWithRetry<Record<string, unknown>>(
+          "config.schema",
+          undefined,
+          15000,
+          1
+        );
+      } catch (err) {
+        warning = formatGatewayError(err);
+        console.warn("Config schema unavailable, serving config without schema:", err);
+      }
+
+      // Gateway config.get returns { parsed, resolved, hash }. parsed = openclaw.json shape (top-level: agents, gateway, channels, tools, etc.).
+      const parsed = (configData.parsed || {}) as Record<string, unknown>;
+      const resolved = (configData.resolved || {}) as Record<string, unknown>;
+      const redacted = redactSensitive(resolved) as Record<string, unknown>;
+
+      return {
+        config: redacted,
+        rawConfig: parsed,
+        resolvedConfig: resolved,
+        baseHash: configData.hash || "",
+        schema: schemaData?.schema || {},
+        uiHints: schemaData?.uiHints || {},
+        warning,
+      };
+    });
 
     logRequest("/api/config", 200, Date.now() - start, { scope });
-    return NextResponse.json({
-      config: redacted,
-      rawConfig: parsed, // same structure as ~/.openclaw/openclaw.json for form + raw editor
-      resolvedConfig: resolved,
-      baseHash: configData.hash || "",
-      schema: schemaData?.schema || {},
-      uiHints: schemaData?.uiHints || {},
-      warning,
-    });
+    return NextResponse.json(result);
   } catch (err) {
     logError("/api/config", err, { scope });
     try {
@@ -522,6 +527,7 @@ export async function PATCH(request: NextRequest) {
       if (fallbackCandidate.entries && fallbackCandidate.entries.length > 0) {
         const fallback = await applyConfigSetFallback(fallbackCandidate.entries);
         if (fallback.failures.length === 0) {
+          invalidateCache("config");
           return NextResponse.json({
             ok: true,
             result: {
@@ -553,6 +559,7 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    invalidateCache("config");
     return NextResponse.json({
       ok: true,
       result,
@@ -595,6 +602,7 @@ export async function PUT(request: NextRequest) {
       20000
     );
 
+    invalidateCache("config");
     return NextResponse.json({ ok: true, result });
   } catch (err) {
     const msg = String(err);

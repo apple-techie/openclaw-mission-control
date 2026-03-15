@@ -7,6 +7,7 @@ import { getDefaultWorkspaceSync, getOpenClawHome } from "@/lib/paths";
 import { gatewayCall, runCliJson } from "@/lib/openclaw";
 import { fetchConfig, extractAgentsList } from "@/lib/gateway-config";
 import { gatewayMemoryIndex } from "@/lib/gateway-tools";
+import { cachedResponse, invalidateCachePrefix } from "@/lib/api-cache";
 
 export const dynamic = "force-dynamic";
 
@@ -1009,6 +1010,9 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const mode = searchParams.get("mode") || "";
+    const cacheKey = `memory-graph:${mode}`;
+
+    const result = await cachedResponse(cacheKey, 30_000, async () => {
     const forceBootstrap = mode === "bootstrap";
     const raw = await readOptional(GRAPH_JSON_PATH);
     let graph: KnowledgeGraph;
@@ -1101,7 +1105,7 @@ export async function GET(request: NextRequest) {
       recentChatMessages: await readRecentChatMessages(8, 50),
     };
 
-    return NextResponse.json({
+    return {
       graph,
       bootstrap: bootstrapInfo
         ? { ...bootstrapInfo, ...(extractionError ? { error: extractionError } : {}) }
@@ -1113,7 +1117,10 @@ export async function GET(request: NextRequest) {
         markdown: GRAPH_MD_PATH,
         memory: MEMORY_MD_PATH,
       },
-    });
+    };
+    }); // end cachedResponse
+
+    return NextResponse.json(result);
   } catch (err) {
     console.error("Memory graph GET error:", err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
@@ -1133,6 +1140,7 @@ export async function POST(request: NextRequest) {
       await writeFile(GRAPH_MD_PATH, graphToMarkdown(graph), "utf-8");
       const reindex = body.reindex !== false;
       const reindexResult = reindex ? await bestEffortReindex() : { indexed: false };
+      invalidateCachePrefix("memory-graph:");
       return NextResponse.json({
         ok: true,
         action,
@@ -1148,6 +1156,7 @@ export async function POST(request: NextRequest) {
       await writeFile(MEMORY_MD_PATH, next, "utf-8");
       const reindex = body.reindex !== false;
       const reindexResult = reindex ? await bestEffortReindex() : { indexed: false };
+      invalidateCachePrefix("memory-graph:");
       return NextResponse.json({
         ok: true,
         action,
