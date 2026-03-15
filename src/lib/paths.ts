@@ -361,6 +361,7 @@ export function getGatewayToken(): string {
 
   // 2. Read from config (sync — token is needed synchronously by callers)
   try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { readFileSync } = require("fs");
     const configPath = join(getOpenClawHome(), "openclaw.json");
     const raw = readFileSync(configPath, "utf-8");

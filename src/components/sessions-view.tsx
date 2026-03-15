@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Trash2, RefreshCw, MessageSquare, Clock, Zap, DollarSign, AlertCircle } from "lucide-react";
 import { estimateCostUsd } from "@/lib/model-metadata";
 import { cn } from "@/lib/utils";
@@ -86,6 +86,9 @@ export function SessionsView() {
       const data = await res.json();
       const list = Array.isArray(data.sessions) ? data.sessions : [];
       setSessions(list);
+      setConfirmDelete((prev) =>
+        prev && !list.some((s: Session) => s.key === prev) ? null : prev,
+      );
       setError(null);
       hasLoadedOnce.current = true;
     } catch (err) {
@@ -127,12 +130,6 @@ export function SessionsView() {
     [],
   );
 
-  // Clear stale confirmDelete if the session disappeared
-  useEffect(() => {
-    if (confirmDelete && !sessions.some((s) => s.key === confirmDelete)) {
-      setConfirmDelete(null);
-    }
-  }, [confirmDelete, sessions]);
 
   if (loading) {
     return (

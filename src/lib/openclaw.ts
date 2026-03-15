@@ -12,6 +12,7 @@
 import { getClient } from "./openclaw-client";
 import type { RunCliResult } from "./openclaw-cli";
 
+export { getClient };
 export type { RunCliResult } from "./openclaw-cli";
 export { parseJsonFromCliOutput } from "./openclaw-cli";
 

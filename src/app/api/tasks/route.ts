@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { join, dirname } from "path";
 import { z } from "zod";
 import { getDefaultWorkspace } from "@/lib/paths";
-import { getClient } from "@/lib/openclaw-client";
+import { getClient } from "@/lib/openclaw";
 import { gatewayCall } from "@/lib/openclaw";
 import { notifyKanbanUpdated } from "@/lib/kanban-live";
 import { parseBody } from "@/lib/api-validation";

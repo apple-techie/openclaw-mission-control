@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { X, TriangleAlert } from "lucide-react";
 import { useGatewayStatusStore } from "@/lib/gateway-status-store";
 
@@ -16,13 +16,10 @@ const DISMISS_KEY = "cli-mode-banner-dismissed";
  */
 export function CliModeBanner() {
   const { transport, initialCheckDone } = useGatewayStatusStore();
-  const [dismissed, setDismissed] = useState(true); // default true to avoid flash
-
-  // Initialise dismissed state from sessionStorage after mount
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    setDismissed(sessionStorage.getItem(DISMISS_KEY) === "1");
-  }, []);
+  const [dismissed, setDismissed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return sessionStorage.getItem(DISMISS_KEY) === "1";
+  });
 
   const handleDismiss = useCallback(() => {
     try {

@@ -624,7 +624,7 @@ export function ChannelsView() {
                               </div>
                               {req.message ? (
                                 <p className="mt-1 line-clamp-1 text-[11px] italic text-stone-500 dark:text-[#8f9aa6]">
-                                  "{req.message}"
+                                  &quot;{req.message}&quot;
                                 </p>
                               ) : null}
                             </div>
