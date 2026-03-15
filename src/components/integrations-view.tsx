@@ -294,10 +294,6 @@ function saveDraft(field: string, value: string) {
   } catch { /* quota exceeded — ignore */ }
 }
 
-function clearAllDrafts() {
-  try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
-}
-
 /** useState backed by localStorage — saves instantly on every change. */
 function useDraft(field: string, fallback = ""): [string, (v: string) => void] {
   const [value, setValue] = useState(() => loadDrafts()[field] ?? fallback);
@@ -448,6 +444,7 @@ export function IntegrationsView() {
         setActionBusy(null);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedAgentId, selectedAccountId],
   );
 
@@ -585,6 +582,7 @@ export function IntegrationsView() {
         setThreadBusy(null);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [runAction, selectedAccount, selectedAgent],
   );
 
@@ -605,7 +603,7 @@ export function IntegrationsView() {
       if (!selectedAccount) return;
       switch (fixAction) {
         case "Reconnect": {
-          const response = await runAction("start-connect", {
+          await runAction("start-connect", {
             email: selectedAccount.email,
             accessLevel: selectedAccount.accessLevel,
           });

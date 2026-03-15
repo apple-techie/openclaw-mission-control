@@ -1,9 +1,6 @@
-import { readFile } from "fs/promises";
-import { join } from "path";
 import { fetchGatewaySessions, summarizeSessionsByAgent } from "@/lib/gateway-sessions";
 import { getFriendlyModelName } from "@/lib/model-metadata";
 import { gatewayCall } from "@/lib/openclaw";
-import { getOpenClawHome } from "@/lib/paths";
 
 type GatewayConfigGet = {
   parsed?: Record<string, unknown>;

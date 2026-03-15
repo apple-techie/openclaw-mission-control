@@ -46,6 +46,7 @@ export function useSmartPoll(
     } finally {
       inFlight.current = false;
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Fire immediately on mount only (not on intervalMs changes)

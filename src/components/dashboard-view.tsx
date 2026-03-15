@@ -31,7 +31,6 @@ import {
   Rocket,
   KeyRound,
   Bell,
-  X,
   Stethoscope,
 } from "lucide-react";
 import { cn } from "@/lib/utils";

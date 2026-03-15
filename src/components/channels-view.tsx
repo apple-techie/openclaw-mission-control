@@ -393,6 +393,7 @@ export function ChannelsView() {
         setBusyKey(null);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [fetchChannels, fetchPairing, setDefaultRoute]
   );
 

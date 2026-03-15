@@ -7,6 +7,7 @@ export type ModelOption = {
   tags: string[];
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function ModelPicker(_props: {
   models: ModelOption[];
   selected: string;

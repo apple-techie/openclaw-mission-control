@@ -272,7 +272,7 @@ function AgentNodeComponent({ data }: NodeProps) {
     selected: boolean;
     onClick: () => void;
   };
-  const { agent, idx, selected } = d;
+  const { agent, selected } = d;
   const sc = STATUS_COLORS[agent.status] || STATUS_COLORS.unknown;
 
   return (
@@ -883,12 +883,10 @@ function buildGraph(
 
 function AgentDetail({
   agent,
-  idx,
   allAgents,
   onUpdated,
 }: {
   agent: Agent;
-  idx: number;
   allAgents: Agent[];
   onUpdated: () => Promise<void>;
 }) {
@@ -1402,7 +1400,7 @@ function GridView({
 }) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 stagger-cards">
-      {agents.map((agent, idx) => {
+      {agents.map((agent) => {
         const sc = STATUS_COLORS[agent.status] || STATUS_COLORS.unknown;
         const selected = selectedId === agent.id;
 
@@ -4433,11 +4431,6 @@ export function AgentsView() {
     [data, selectedId]
   );
 
-  const selectedIdx = useMemo(
-    () => data?.agents.findIndex((a) => a.id === selectedId) ?? 0,
-    [data, selectedId]
-  );
-
   const editingAgent = useMemo(
     () => data?.agents.find((a) => a.id === editingAgentId) || null,
     [data, editingAgentId]
@@ -4594,7 +4587,6 @@ export function AgentsView() {
           {selectedAgent && (
             <AgentDetail
               agent={selectedAgent}
-              idx={selectedIdx}
               allAgents={data.agents}
               onUpdated={fetchAgents}
             />

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { join, dirname } from "path";
+import { join } from "path";
 import { z } from "zod";
 import { getDefaultWorkspace } from "@/lib/paths";
 import { getClient } from "@/lib/openclaw";
@@ -268,7 +268,6 @@ async function handleInit(body: { starterTasks?: KanbanTask[] }) {
 
   // Ensure workspace directory exists via mkdir through exec
   try {
-    const dir = dirname(kanbanPath);
     // Use the client to create the directory if needed
     // Try writing to kanban first; if the dir doesn't exist the write will error,
     // but the gateway transport handles directory creation internally.

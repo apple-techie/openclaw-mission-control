@@ -10,6 +10,7 @@ import { notifyGatewayRestarting } from "@/lib/gateway-status-store";
 
 let _pending = false;
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function requestRestart(_reason?: string): void {
   if (_pending) return;
   _pending = true;
@@ -29,8 +30,10 @@ export function requestRestart(_reason?: string): void {
 
 // Keep these exports as no-ops so any remaining consumers don't break at runtime.
 export function dismissRestart(): void {}
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function setRestarting(_val: boolean): void {}
-export function subscribeRestartStore(listener: () => void): () => void {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function subscribeRestartStore(_listener: () => void): () => void {
   return () => {};
 }
 export function getRestartSnapshot() {

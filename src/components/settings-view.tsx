@@ -961,34 +961,6 @@ function SettingRow({
   );
 }
 
-function ToggleSwitch({
-  checked,
-  onChange,
-}: {
-  checked: boolean;
-  onChange: (val: boolean) => void;
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      onClick={() => onChange(!checked)}
-      className={cn(
-        "relative h-5 w-9 shrink-0 rounded-full transition-colors",
-        checked ? "bg-primary" : "bg-muted",
-      )}
-    >
-      <span
-        className={cn(
-          "absolute top-0.5 block h-4 w-4 rounded-full bg-white shadow transition-transform",
-          checked ? "left-4" : "left-0.5",
-        )}
-      />
-    </button>
-  );
-}
-
 const BADGE_COLORS: Record<string, string> = {
   emerald: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
   amber: "border-amber-500/20 bg-amber-500/10 text-amber-400",

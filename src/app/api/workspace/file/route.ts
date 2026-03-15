@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readFile } from "fs/promises";
-import { join, normalize, resolve } from "path";
+import { normalize, resolve } from "path";
 import { getDefaultWorkspace } from "@/lib/paths";
 
 const IMAGE_EXTENSIONS = new Set([

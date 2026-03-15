@@ -1,11 +1,6 @@
-import { readFile } from "fs/promises";
-import { join } from "path";
 import { fetchGatewaySessions } from "@/lib/gateway-sessions";
 import { getFriendlyModelName } from "@/lib/model-metadata";
 import { gatewayCallWithRetry } from "@/lib/gateway-config";
-import { getOpenClawHome } from "@/lib/paths";
-
-const OPENCLAW_HOME = getOpenClawHome();
 
 export type ModelInfo = {
   key: string;

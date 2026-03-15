@@ -211,7 +211,7 @@ export function NotificationCenter() {
     } catch {
       /* ignore */
     }
-  }, [open]);
+  }, []);
 
   useSmartPoll(fetchNotifications, { intervalMs: slowBackgroundPolling ? 60_000 : 20_000 });
 

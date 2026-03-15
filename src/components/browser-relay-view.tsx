@@ -376,6 +376,7 @@ export function BrowserRelayView({ isHosted = false }: { isHosted?: boolean }) {
         setActionBusy(null);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [profile, snapshot]
   );
 

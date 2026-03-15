@@ -38,7 +38,6 @@ import {
   Settings2,
   Webhook,
   Stethoscope,
-  HelpCircle,
   Puzzle,
   Radio,
 } from "lucide-react";
@@ -94,44 +93,6 @@ const defaultNavItems: NavItem[] = [
   { section: "search", label: "Web Search", icon: Search, href: "/search" },
   { section: "tailscale", label: "Tailscale", icon: Waypoints, href: "/tailscale", beta: true },
   { section: "config", label: "Config", icon: Settings, href: "/config" },
-];
-
-const hostedNavItems: NavItem[] = [
-  // ── Core ──
-  { group: "Core", section: "chat", label: "Chat", icon: MessageCircle, href: "/chat" },
-  { section: "channels", label: "Channels", icon: Radio, href: "/channels" },
-  { section: "tasks", label: "Tasks", icon: ListChecks, href: "/tasks" },
-  { section: "skills", label: "Skills", icon: Wrench, href: "/skills" },
-  { section: "accounts", label: "API Keys", icon: KeyRound, href: "/accounts" },
-  { section: "help", label: "Help & Support", icon: HelpCircle, href: "/help" },
-  // ── Overview ──
-  { group: "Overview", section: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
-  { section: "activity", label: "Activity", icon: Activity, href: "/activity" },
-  { section: "usage", label: "Usage", icon: BarChart3, href: "/usage" },
-  // ── Agents ──
-  { group: "Agents", section: "agents", label: "Agents", icon: Users, href: "/agents" },
-  { section: "agents", label: "Models", icon: Cpu, href: "/agents?tab=models", tab: "models", isSubItem: true },
-  { section: "sessions", label: "Sessions", icon: MessageSquare, href: "/sessions" },
-  // ── Work ──
-  { group: "Work", section: "cron", label: "Cron Jobs", icon: Clock, href: "/cron" },
-  // ── Knowledge ──
-  { group: "Knowledge", section: "memory", label: "Memory", icon: Brain, href: "/memory" },
-  { section: "docs", label: "Documents", icon: FolderOpen, href: "/documents" },
-  // ── Configure ──
-  { group: "Configure", section: "settings", label: "Preferences", icon: Settings2, href: "/settings" },
-  // ── Advanced ──
-  { group: "Advanced", section: "agents", label: "Subagents", icon: Users2, href: "/agents?tab=subagents", tab: "subagents" },
-  { section: "skills", label: "ClawHub", icon: Package, href: "/skills?tab=clawhub", tab: "clawhub", group: "Advanced" },
-  { section: "cron", label: "Heartbeat", icon: Heart, href: "/heartbeat", tab: "heartbeat", group: "Advanced" },
-  { section: "vectors", label: "Vector DB", icon: Database, href: "/vectors", group: "Advanced" },
-  { section: "security", label: "Security", icon: ShieldCheck, href: "/security", group: "Advanced" },
-  { section: "hooks", label: "Hooks", icon: Webhook, href: "/hooks", group: "Advanced" },
-  { section: "terminal", label: "Terminal", icon: SquareTerminal, href: "/terminal", group: "Advanced" },
-  { section: "logs", label: "Logs", icon: Terminal, href: "/logs", group: "Advanced" },
-  { section: "browser", label: "Browser Relay", icon: Globe, href: "/browser", group: "Advanced" },
-  { section: "audio", label: "Audio & Voice", icon: Volume2, href: "/audio", group: "Advanced" },
-  { section: "search", label: "Web Search", icon: Search, href: "/search", group: "Advanced" },
-  { section: "config", label: "Config", icon: Settings, href: "/config", group: "Advanced" },
 ];
 
 const navItems = defaultNavItems;
@@ -217,7 +178,7 @@ function SidebarNav({ onNavigate, collapsed }: { onNavigate?: () => void; collap
   const [skillsExpanded, setSkillsExpanded] = useState(false);
   const [agentsExpanded, setAgentsExpanded] = useState(false);
   const [cronExpanded, setCronExpanded] = useState(false);
-  const [advancedExpanded, setAdvancedExpanded] = useState(false);
+  const [advancedExpanded] = useState(false);
   const isClawHubActive = section === "skills" && tab === "clawhub";
   const showSkillsChildren = isClawHubActive ? true : skillsExpanded;
   const isSubagentsActive = section === "agents" && tab === "subagents";

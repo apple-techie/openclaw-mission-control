@@ -255,10 +255,12 @@ function ChatPanel({
   agentId,
   agentName,
   agentEmoji: emoji,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   agentModel,
   isSelected,
   isVisible,
   availableModels,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   selectedProvider,
   modelsLoaded,
   isPostOnboarding,
@@ -922,11 +924,11 @@ export function ChatView({ isVisible = true }: { isVisible?: boolean }) {
   selectedAgentRef.current = selectedAgent;
   const [agentsLoading, setAgentsLoading] = useState(true);
   const [availableModels, setAvailableModels] = useState<Array<{ key: string; name: string }>>([]);
-  const [connectedProviders, setConnectedProviders] = useState<Array<{ id: string; name: string }>>([]);
+  const [, setConnectedProviders] = useState<Array<{ id: string; name: string }>>([]);
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
   const [providerDropdownOpen, setProviderDropdownOpen] = useState(false);
   const [modelsLoaded, setModelsLoaded] = useState(false);
-  const [now, setNow] = useState(() => Date.now());
+  const [, setNow] = useState(() => Date.now());
   const providerDropdownRef = useRef<HTMLDivElement>(null);
 
   // ── Warm-up state: friendly loading for new users ──

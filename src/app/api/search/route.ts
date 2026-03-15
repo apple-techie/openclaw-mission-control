@@ -3,15 +3,6 @@ import { gatewayMemorySearch } from "@/lib/gateway-tools";
 
 export const dynamic = "force-dynamic";
 
-type SearchResult = {
-  path: string;
-  startLine: number;
-  endLine: number;
-  score: number;
-  snippet: string;
-  source: string;
-};
-
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("q");
