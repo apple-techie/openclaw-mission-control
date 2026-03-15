@@ -205,7 +205,7 @@ function SectionContent({ section }: { section: DashboardSection }) {
     case "tailscale":
       return <TailscaleView />;
     case "browser":
-      return <BrowserRelayView isHosted={isAgentbayHosting} />;
+      return <BrowserRelayView isHosted={false} />;
     case "calendar":
       return <CalendarView />;
     case "integrations":

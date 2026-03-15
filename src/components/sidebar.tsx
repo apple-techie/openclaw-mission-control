@@ -86,13 +86,13 @@ const defaultNavItems: NavItem[] = [
   { section: "hooks", label: "Hooks", icon: Webhook, href: "/hooks" },
   { section: "settings", label: "Preferences", icon: Settings2, href: "/settings" },
   // ── System ──
-  ...(!isAgentbayHosting ? [{ section: "doctor", label: "Doctor", icon: Stethoscope, href: "/doctor", group: "System", beta: true } as NavItem] : []),
-  { group: isAgentbayHosting ? "System" : undefined, section: "terminal", label: "Terminal", icon: SquareTerminal, href: "/terminal" },
+  { section: "doctor", label: "Doctor", icon: Stethoscope, href: "/doctor", group: "System", beta: true },
+  { section: "terminal", label: "Terminal", icon: SquareTerminal, href: "/terminal" },
   { section: "logs", label: "Logs", icon: Terminal, href: "/logs" },
   { section: "browser", label: "Browser Relay", icon: Globe, href: "/browser" },
   { section: "audio", label: "Audio & Voice", icon: Volume2, href: "/audio" },
   { section: "search", label: "Web Search", icon: Search, href: "/search" },
-  ...(!isAgentbayHosting ? [{ section: "tailscale", label: "Tailscale", icon: Waypoints, href: "/tailscale", beta: true } as NavItem] : []),
+  { section: "tailscale", label: "Tailscale", icon: Waypoints, href: "/tailscale", beta: true },
   { section: "config", label: "Config", icon: Settings, href: "/config" },
 ];
 
@@ -134,7 +134,7 @@ const hostedNavItems: NavItem[] = [
   { section: "config", label: "Config", icon: Settings, href: "/config", group: "Advanced" },
 ];
 
-const navItems = isAgentbayHosting ? hostedNavItems : defaultNavItems;
+const navItems = defaultNavItems;
 
 const SIDEBAR_COLLAPSED_KEY = "sidebar_collapsed";
 const SIDEBAR_WIDTH_KEY = "sidebar_width";
@@ -239,7 +239,7 @@ function SidebarNav({ onNavigate, collapsed }: { onNavigate?: () => void; collap
         const isSkillsParent = item.section === "skills" && item.label === "Skills";
         const isAgentsParent = item.section === "agents" && item.label === "Agents";
         const isCronParent = item.section === "cron" && item.label === "Cron Jobs";
-        const isAdvancedItem = isAgentbayHosting && item.group === "Advanced";
+        const isAdvancedItem = false;
         const previousGroup = index > 0 ? navItems[index - 1]?.group : undefined;
         const showGroupHeader = item.group && item.group !== previousGroup;
         const Icon = item.icon;
@@ -287,21 +287,9 @@ function SidebarNav({ onNavigate, collapsed }: { onNavigate?: () => void; collap
         return (
           <div key={`${item.section}:${item.label}`}>
             {showGroupHeader && !collapsed && (
-              isAgentbayHosting && item.group === "Advanced" ? (
-                <button
-                  type="button"
-                  onClick={() => setAdvancedExpanded((prev) => !prev)}
-                  className="mb-1.5 mt-4 first:mt-0 flex w-full items-center justify-between rounded-md px-2.5 py-1 text-xs font-semibold uppercase tracking-widest text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600 dark:text-stone-500 dark:hover:bg-[#171b1f] dark:hover:text-[#a8b0ba]"
-                  aria-expanded={advancedExpanded}
-                >
-                  <span>Advanced</span>
-                  <ChevronRight className={cn("h-3 w-3 transition-transform", advancedExpanded && "rotate-90")} />
-                </button>
-              ) : (
-                <div className="mb-1.5 mt-4 first:mt-0 px-2.5 text-xs font-semibold uppercase tracking-widest text-stone-400 dark:text-stone-500">
-                  {item.group}
-                </div>
-              )
+              <div className="mb-1.5 mt-4 first:mt-0 px-2.5 text-xs font-semibold uppercase tracking-widest text-stone-400 dark:text-stone-500">
+                {item.group}
+              </div>
             )}
             {showGroupHeader && collapsed && (
               <div className="my-2 mx-1 border-t border-stone-200 dark:border-[#23282e]" />
