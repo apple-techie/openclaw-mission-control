@@ -8,8 +8,9 @@
 
 import { gatewayCall, runCliCaptureBoth } from "./openclaw";
 import { getOpenClawHome } from "./paths";
-import { readFile, writeFile } from "fs/promises";
+import { readFile } from "fs/promises";
 import { join } from "path";
+import { updateConfigFile } from "./config-manager";
 
 // ── Helpers ──────────────────────────────────────
 
@@ -44,17 +45,22 @@ export async function sanitizeConfigFile(): Promise<boolean> {
   if (typeof config !== "object" || config === null || Array.isArray(config)) {
     return false;
   }
-  let changed = false;
+  let hasLeakedKeys = false;
   for (const key of LEAKED_RPC_KEYS) {
     if (key in config) {
-      delete config[key];
-      changed = true;
+      hasLeakedKeys = true;
+      break;
     }
   }
-  if (changed) {
-    await writeFile(configPath, JSON.stringify(config, null, 2) + "\n", "utf-8");
+  if (hasLeakedKeys) {
+    await updateConfigFile((cfg) => {
+      for (const key of LEAKED_RPC_KEYS) {
+        delete cfg[key];
+      }
+      return cfg;
+    });
   }
-  return changed;
+  return hasLeakedKeys;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

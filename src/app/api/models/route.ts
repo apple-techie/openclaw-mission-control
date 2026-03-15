@@ -11,6 +11,7 @@ import {
   fetchModelsFromProvider,
 } from "@/lib/provider-auth";
 import { patchConfig } from "@/lib/gateway-config";
+import { updateConfigFile } from "@/lib/config-manager";
 
 const AuthProviderSchema = z.object({
   provider: z.string().trim().toLowerCase().min(1, "Provider is required"),
@@ -84,36 +85,30 @@ export async function POST(request: NextRequest) {
         // Layer 2: Direct disk write (fallback)
         if (!method) {
           try {
-            const configPath = join(OPENCLAW_HOME, "openclaw.json");
+            await updateConfigFile((config) => {
+              if (envKey) {
+                const env = (config.env || {}) as Record<string, unknown>;
+                env[envKey] = token;
+                config.env = env;
+              }
+              const auth = (config.auth || {}) as Record<string, unknown>;
+              const profiles = (auth.profiles || {}) as Record<string, unknown>;
+              profiles[`${provider}:default`] = { provider, mode: "api_key" };
+              auth.profiles = profiles;
+              config.auth = auth;
+
+              if (modelToSet) {
+                const agents = (config.agents || {}) as Record<string, unknown>;
+                const defaults = (agents.defaults || {}) as Record<string, unknown>;
+                defaults.model = { primary: modelToSet };
+                agents.defaults = defaults;
+                config.agents = agents;
+              }
+              return config;
+            });
+
+            // Write to auth-profiles.json (separate file, not covered by config manager)
             const authPath = join(OPENCLAW_HOME, "agents", "main", "agent", "auth-profiles.json");
-
-            // Write to openclaw.json
-            let config: Record<string, unknown> = {};
-            try { config = JSON.parse(await readFile(configPath, "utf-8")); } catch { /* fresh */ }
-
-            if (envKey) {
-              const env = (config.env || {}) as Record<string, unknown>;
-              env[envKey] = token;
-              config.env = env;
-            }
-            const auth = (config.auth || {}) as Record<string, unknown>;
-            const profiles = (auth.profiles || {}) as Record<string, unknown>;
-            profiles[`${provider}:default`] = { provider, mode: "api_key" };
-            auth.profiles = profiles;
-            config.auth = auth;
-
-            if (modelToSet) {
-              const agents = (config.agents || {}) as Record<string, unknown>;
-              const defaults = (agents.defaults || {}) as Record<string, unknown>;
-              defaults.model = { primary: modelToSet };
-              agents.defaults = defaults;
-              config.agents = agents;
-            }
-
-            await mkdir(dirname(configPath), { recursive: true });
-            await writeFile(configPath, JSON.stringify(config, null, 2) + "\n", "utf-8");
-
-            // Write to auth-profiles.json
             let authData: { profiles: Record<string, unknown> } = { profiles: {} };
             try {
               authData = JSON.parse(await readFile(authPath, "utf-8"));
@@ -152,21 +147,19 @@ export async function POST(request: NextRequest) {
 
         // Disk fallback
         try {
-          const configPath = join(OPENCLAW_HOME, "openclaw.json");
-          let config: Record<string, unknown> = {};
-          try { config = JSON.parse(await readFile(configPath, "utf-8")); } catch { /* */ }
-
-          if (envKey) {
-            const env = (config.env || {}) as Record<string, unknown>;
-            delete env[envKey];
-            config.env = env;
-          }
-          const auth = (config.auth || {}) as Record<string, unknown>;
-          const profiles = (auth.profiles || {}) as Record<string, unknown>;
-          delete profiles[`${provider}:default`];
-          auth.profiles = profiles;
-          config.auth = auth;
-          await writeFile(configPath, JSON.stringify(config, null, 2) + "\n", "utf-8");
+          await updateConfigFile((config) => {
+            if (envKey) {
+              const env = (config.env || {}) as Record<string, unknown>;
+              delete env[envKey];
+              config.env = env;
+            }
+            const auth = (config.auth || {}) as Record<string, unknown>;
+            const profiles = (auth.profiles || {}) as Record<string, unknown>;
+            delete profiles[`${provider}:default`];
+            auth.profiles = profiles;
+            config.auth = auth;
+            return config;
+          });
 
           // Also clean auth-profiles.json
           const authPath = join(OPENCLAW_HOME, "agents", "main", "agent", "auth-profiles.json");
@@ -196,15 +189,14 @@ export async function POST(request: NextRequest) {
           console.error("[set-primary] patchConfig failed, trying disk fallback:", patchErr);
           // Disk fallback — write to the main config file
           try {
-            const configPath = join(OPENCLAW_HOME, "openclaw.json");
-            let config: Record<string, unknown> = {};
-            try { config = JSON.parse(await readFile(configPath, "utf-8")); } catch { /* */ }
-            const agents = (config.agents || {}) as Record<string, unknown>;
-            const defaults = (agents.defaults || {}) as Record<string, unknown>;
-            defaults.model = { primary: model };
-            agents.defaults = defaults;
-            config.agents = agents;
-            await writeFile(configPath, JSON.stringify(config, null, 2) + "\n", "utf-8");
+            await updateConfigFile((config) => {
+              const agents = (config.agents || {}) as Record<string, unknown>;
+              const defaults = (agents.defaults || {}) as Record<string, unknown>;
+              defaults.model = { primary: model };
+              agents.defaults = defaults;
+              config.agents = agents;
+              return config;
+            });
             return json({ ok: true, model });
           } catch (err) {
             return json({ error: `Failed to set model: ${err}` }, 500);
